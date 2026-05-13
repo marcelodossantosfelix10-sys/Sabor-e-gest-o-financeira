@@ -1,0 +1,75 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Produto",
+      "description": "Item vendido na lanchonete ou confeitaria",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "sellingPrice": { "type": "number" },
+        "costPrice": { "type": "number" },
+        "stock": { "type": "number" },
+        "unit": { "type": "string" },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["name", "category", "sellingPrice", "costPrice", "stock"]
+    },
+    "Transaction": {
+      "title": "Transação",
+      "description": "Registro de entrada ou saída financeira",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["income", "expense"] },
+        "amount": { "type": "number" },
+        "category": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "description": { "type": "string" },
+        "productId": { "type": "string" },
+        "quantity": { "type": "number" }
+      },
+      "required": ["type", "amount", "category", "date"]
+    },
+    "Category": {
+      "title": "Categoria",
+      "description": "Categorização de produtos ou despesas",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["product", "expense"] }
+      },
+      "required": ["name", "type"]
+    },
+    "ShoppingItem": {
+      "title": "Item de Compra",
+      "description": "Item necessário para compra",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "quantity": { "type": "number" },
+        "unit": { "type": "string" },
+        "isBought": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "isBought"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Produtos cadastrados"
+    },
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Histórico financeiro"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Categorias de produtos e despesas"
+    },
+    "/shopping_list/{itemId}": {
+      "schema": "ShoppingItem",
+      "description": "Lista de compras"
+    }
+  }
+}

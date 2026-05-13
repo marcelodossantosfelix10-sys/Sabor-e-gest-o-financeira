@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitive Definition
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // Phase 4: Match blocks
+    match /products/{productId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidProduct(incoming());
+      allow update: if isSignedIn() && isValidProduct(incoming()) && (
+        (incoming().diff(existing()).affectedKeys().hasOnly(['name', 'category', 'sellingPrice', 'costPrice', 'stock', 'unit', 'imageUrl']))
+      );
+      allow delete: if isSignedIn();
+    }
+
+    match /transactions/{transactionId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidTransaction(incoming());
+      allow update: if false; // Transactions are usually immutable
+      allow delete: if isSignedIn();
+    }
+
+    match /categories/{categoryId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    // Validation Helpers
+    function isValidProduct(data) {
+      return data.keys().hasAll(['name', 'category', 'sellingPrice', 'costPrice', 'stock'])
+        && data.keys().size() >= 5 && data.keys().size() <= 8
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.category is string && data.category.size() > 0
+        && data.sellingPrice is number && data.sellingPrice >= 0
+        && data.costPrice is number && data.costPrice >= 0
+        && data.stock is number;
+    }
+
+    function isValidTransaction(data) {
+      return data.keys().hasAll(['type', 'amount', 'category', 'date'])
+        && data.keys().size() >= 4 && data.keys().size() <= 7
+        && data.type in ['income', 'expense']
+        && data.amount is number && data.amount >= 0
+        && data.category is string
+        && data.date is string; // ISO string ideally, but rule validation for date strings is limited without custom regex
+    }
+  }
+}
