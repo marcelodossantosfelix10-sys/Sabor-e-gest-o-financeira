@@ -20,6 +20,17 @@ export default function ShoppingList() {
   const [newItemUnit, setNewItemUnit] = useState('un');
   const [newItemPrice, setNewItemPrice] = useState<number | ''>('');
 
+  const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+  });
+
+  const totalPrice = items.reduce((sum, item) => {
+    const itemTotal = (item.price ?? 0) * (item.quantity || 1);
+    return sum + itemTotal;
+  }, 0);
+
   useEffect(() => {
     const q = query(collection(db, 'shopping_list'), orderBy('isBought', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -89,16 +100,17 @@ export default function ShoppingList() {
               required
             />
           </div>
-          <div className="flex-1 flex gap-2">
+          <div className="flex-1 flex flex-col gap-2 sm:flex-row">
             <input
               type="number"
               placeholder="Qtd"
-              className="w-20 px-4 py-3 bg-gray-50 border border-[#E4E3E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#141414]/10 transition-all font-bold"
+              className="w-full px-4 py-3 bg-gray-50 border border-[#E4E3E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#141414]/10 transition-all font-bold"
               value={newItemQty}
               onChange={(e) => setNewItemQty(e.target.value ? parseFloat(e.target.value) : '')}
+              min={0}
             />
             <select
-              className="w-20 px-4 py-3 bg-gray-50 border border-[#E4E3E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#141414]/10 transition-all font-medium appearance-none"
+              className="w-full px-4 py-3 bg-gray-50 border border-[#E4E3E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#141414]/10 transition-all font-medium appearance-none"
               value={newItemUnit}
               onChange={(e) => setNewItemUnit(e.target.value)}
             >
@@ -109,9 +121,7 @@ export default function ShoppingList() {
               <option value="ml">ml</option>
               <option value="pct">pct</option>
             </select>
-          </div>
-          <div className="flex-1">
-            <div className="relative">
+            <div className="relative w-full">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">R$</span>
               <input
                 type="number"
@@ -120,6 +130,7 @@ export default function ShoppingList() {
                 className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-[#E4E3E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#141414]/10 transition-all font-bold"
                 value={newItemPrice}
                 onChange={(e) => setNewItemPrice(e.target.value ? parseFloat(e.target.value) : '')}
+                min={0}
               />
             </div>
           </div>
@@ -159,15 +170,18 @@ export default function ShoppingList() {
                     </button>
                     <div className={item.isBought ? 'opacity-40 line-through' : ''}>
                       <p className="font-bold text-[#141414]">{item.name}</p>
-                      <div className="flex gap-2">
+                      <div className="space-y-1 text-[10px] text-gray-400 uppercase tracking-widest">
                         {item.quantity ? (
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                          <p>
                             {item.quantity} {item.unit}
+                            {item.price ? ` · ${currencyFormatter.format(item.price)} / ${item.unit}` : ''}
                           </p>
+                        ) : item.price ? (
+                          <p>{currencyFormatter.format(item.price)} por item</p>
                         ) : null}
                         {item.price ? (
-                          <p className="text-[10px] font-bold text-brand-pink uppercase tracking-widest">
-                            • R$ {item.price.toFixed(2)}
+                          <p className="font-semibold text-[10px] text-gray-500">
+                            Total: {currencyFormatter.format((item.price || 0) * (item.quantity || 1))}
                           </p>
                         ) : null}
                       </div>
@@ -208,6 +222,21 @@ export default function ShoppingList() {
           </div>
         )}
       </div>
+      {items.length > 0 && !loading && (
+        <div className="bg-white rounded-2xl border border-[#E4E3E0] p-6 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <p className="text-sm uppercase text-gray-400 tracking-widest">Total estimado da compra</p>
+              <p className="text-3xl font-bold text-[#141414]">
+                {currencyFormatter.format(totalPrice)}
+              </p>
+            </div>
+            <p className="text-sm text-gray-500">
+              Baseado no preço informado para cada item. Ajuste quantidades ou preços conforme necessário.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
