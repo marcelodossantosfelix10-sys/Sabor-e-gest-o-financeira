@@ -33,6 +33,7 @@ export interface ShoppingItem {
   name: string;
   quantity?: number;
   unit?: string;
+  price?: number;
   isBought: boolean;
   createdAt?: string;
 }

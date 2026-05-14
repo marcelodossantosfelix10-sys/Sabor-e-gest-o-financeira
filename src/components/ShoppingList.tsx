@@ -18,6 +18,7 @@ export default function ShoppingList() {
   const [newItemName, setNewItemName] = useState('');
   const [newItemQty, setNewItemQty] = useState<number | ''>('');
   const [newItemUnit, setNewItemUnit] = useState('un');
+  const [newItemPrice, setNewItemPrice] = useState<number | ''>('');
 
   useEffect(() => {
     const q = query(collection(db, 'shopping_list'), orderBy('isBought', 'asc'));
@@ -38,11 +39,13 @@ export default function ShoppingList() {
         name: newItemName,
         quantity: newItemQty || 0,
         unit: newItemUnit,
+        price: newItemPrice || 0,
         isBought: false,
         createdAt: new Date().toISOString()
       });
       setNewItemName('');
       setNewItemQty('');
+      setNewItemPrice('');
     } catch (err) {
       handleFirestoreError(err, OperationType.WRITE, 'shopping_list');
     }
@@ -90,12 +93,12 @@ export default function ShoppingList() {
             <input
               type="number"
               placeholder="Qtd"
-              className="w-full px-4 py-3 bg-gray-50 border border-[#E4E3E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#141414]/10 transition-all font-bold"
+              className="w-20 px-4 py-3 bg-gray-50 border border-[#E4E3E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#141414]/10 transition-all font-bold"
               value={newItemQty}
               onChange={(e) => setNewItemQty(e.target.value ? parseFloat(e.target.value) : '')}
             />
             <select
-              className="px-4 py-3 bg-gray-50 border border-[#E4E3E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#141414]/10 transition-all font-medium appearance-none"
+              className="w-20 px-4 py-3 bg-gray-50 border border-[#E4E3E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#141414]/10 transition-all font-medium appearance-none"
               value={newItemUnit}
               onChange={(e) => setNewItemUnit(e.target.value)}
             >
@@ -106,6 +109,19 @@ export default function ShoppingList() {
               <option value="ml">ml</option>
               <option value="pct">pct</option>
             </select>
+          </div>
+          <div className="flex-1">
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">R$</span>
+              <input
+                type="number"
+                step="0.01"
+                placeholder="Preço"
+                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-[#E4E3E0] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#141414]/10 transition-all font-bold"
+                value={newItemPrice}
+                onChange={(e) => setNewItemPrice(e.target.value ? parseFloat(e.target.value) : '')}
+              />
+            </div>
           </div>
           <button
             type="submit"
@@ -143,22 +159,44 @@ export default function ShoppingList() {
                     </button>
                     <div className={item.isBought ? 'opacity-40 line-through' : ''}>
                       <p className="font-bold text-[#141414]">{item.name}</p>
-                      {item.quantity ? (
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                          {item.quantity} {item.unit}
-                        </p>
-                      ) : null}
+                      <div className="flex gap-2">
+                        {item.quantity ? (
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                            {item.quantity} {item.unit}
+                          </p>
+                        ) : null}
+                        {item.price ? (
+                          <p className="text-[10px] font-bold text-brand-pink uppercase tracking-widest">
+                            • R$ {item.price.toFixed(2)}
+                          </p>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
-                  <button
-                    onClick={() => deleteItem(item.id)}
-                    className="p-2 text-gray-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <div className="flex items-center gap-4">
+                    {item.price && item.quantity ? (
+                      <p className="font-mono text-xs font-bold text-[#141414]">
+                        R$ {(item.price * item.quantity).toFixed(2)}
+                      </p>
+                    ) : null}
+                    <button
+                      onClick={() => deleteItem(item.id)}
+                      className="p-2 text-gray-300 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>
+            {items.length > 0 && (
+              <div className="p-6 bg-gray-50 border-t border-[#E4E3E0] flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-500 uppercase tracking-widest">Valor Total Estimado</span>
+                <span className="text-xl font-bold font-mono text-brand-dark">
+                  R$ {items.reduce((acc, item) => acc + ((item.price || 0) * (item.quantity || 1)), 0).toFixed(2)}
+                </span>
+              </div>
+            )}
             {items.length === 0 && (
               <div className="p-12 text-center">
                 <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mx-auto mb-4">

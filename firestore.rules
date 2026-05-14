@@ -38,7 +38,7 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create: if isSignedIn() && isValidShoppingItem(incoming());
       allow update: if isSignedIn() && isValidShoppingItem(incoming()) && (
-        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'quantity', 'unit', 'isBought'])
+        incoming().diff(existing()).affectedKeys().hasOnly(['name', 'quantity', 'unit', 'isBought', 'price'])
       );
       allow delete: if isSignedIn();
     }
@@ -46,9 +46,10 @@ service cloud.firestore {
     // Validation Helpers
     function isValidShoppingItem(data) {
       return data.keys().hasAll(['name', 'isBought'])
-        && data.keys().size() >= 2 && data.keys().size() <= 5
+        && data.keys().size() >= 2 && data.keys().size() <= 6
         && data.name is string && data.name.size() > 0
-        && data.isBought is bool;
+        && data.isBought is bool
+        && (!data.hasAny(['price']) || data.price is number);
     }
 
     function isValidProduct(data) {
