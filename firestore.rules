@@ -7,7 +7,7 @@ service cloud.firestore {
     }
 
     // Phase 3: Primitive Definition
-    function isSignedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+    function isSignedIn() { return request.auth != null; }
     function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
@@ -15,32 +15,32 @@ service cloud.firestore {
     // Phase 4: Match blocks
     match /products/{productId} {
       allow read: if isSignedIn();
-      allow create: if isSignedIn() && isValidProduct(incoming());
-      allow update: if isSignedIn() && isValidProduct(incoming()) && (
+      allow create: if isSignedIn() && isValidId(productId) && isValidProduct(incoming());
+      allow update: if isSignedIn() && isValidId(productId) && isValidProduct(incoming()) && (
         (incoming().diff(existing()).affectedKeys().hasOnly(['name', 'category', 'sellingPrice', 'costPrice', 'stock', 'unit', 'imageUrl']))
       );
-      allow delete: if isSignedIn();
+      allow delete: if isSignedIn() && isValidId(productId);
     }
 
     match /transactions/{transactionId} {
       allow read: if isSignedIn();
-      allow create: if isSignedIn() && isValidTransaction(incoming());
+      allow create: if isSignedIn() && isValidId(transactionId) && isValidTransaction(incoming());
       allow update: if false; // Transactions are usually immutable
-      allow delete: if isSignedIn();
+      allow delete: if isSignedIn() && isValidId(transactionId);
     }
 
     match /categories/{categoryId} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow write: if isSignedIn() && isValidId(categoryId);
     }
 
     match /shopping_list/{itemId} {
       allow read: if isSignedIn();
-      allow create: if isSignedIn() && isValidShoppingItem(incoming());
-      allow update: if isSignedIn() && isValidShoppingItem(incoming()) && (
+      allow create: if isSignedIn() && isValidId(itemId) && isValidShoppingItem(incoming());
+      allow update: if isSignedIn() && isValidId(itemId) && isValidShoppingItem(incoming()) && (
         incoming().diff(existing()).affectedKeys().hasOnly(['name', 'quantity', 'unit', 'isBought', 'price'])
       );
-      allow delete: if isSignedIn();
+      allow delete: if isSignedIn() && isValidId(itemId);
     }
 
     // Validation Helpers

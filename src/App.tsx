@@ -35,7 +35,8 @@ export default function App() {
       } else if (error.code === 'auth/operation-not-allowed') {
         setLoginError("O login via Google não está ativado no Console do Firebase. Vá em Authentication > Sign-in method.");
       } else if (error.code === 'auth/unauthorized-domain') {
-        setLoginError(`Este domínio não está autorizado no Firebase Console. Adicione ${window.location.origin} em Authentication > Settings > Authorized Domains.`);
+        const domain = window.location.hostname;
+        setLoginError(`Este domínio (${domain}) não está autorizado no Firebase Console. Adicione este domínio exato em: Authentication > Settings > Authorized Domains.`);
       } else {
         setLoginError("Ocorreu um erro ao entrar. Verifique sua conexão ou as configurações do Firebase.");
       }
@@ -51,7 +52,7 @@ export default function App() {
           className="w-20 h-20"
         >
           <img 
-            src="/logo.svg" 
+            src="/logo.png" 
             alt="Loading" 
             className="w-full h-full object-contain rounded-full border-2 border-brand-pink bg-brand-pink" 
             referrerPolicy="no-referrer"
@@ -73,7 +74,7 @@ export default function App() {
           <div className="flex justify-center mb-8">
             <div className="w-24 h-24 bg-brand-pink flex items-center justify-center rounded-full shadow-2xl p-1 border-2 border-brand-gold relative overflow-hidden">
               <img 
-                src="/logo.svg" 
+                src="/logo.png" 
                 alt="Logo" 
                 className="w-full h-full object-cover rounded-full" 
                 referrerPolicy="no-referrer"

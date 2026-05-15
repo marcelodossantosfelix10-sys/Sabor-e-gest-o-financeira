@@ -71,11 +71,14 @@ export default function Products() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Tem certeza que deseja excluir este produto?')) {
+    if (window.confirm('Tem certeza que deseja excluir este produto?')) {
       try {
+        console.log(`Tentando excluir produto: ${id}`);
         await deleteDoc(doc(db, 'products', id));
+        console.log('Produto excluído com sucesso');
       } catch (err) {
-        handleFirestoreError(err, OperationType.DELETE, 'products');
+        console.error('Erro ao excluir produto:', err);
+        handleFirestoreError(err, OperationType.DELETE, `products/${id}`);
       }
     }
   };

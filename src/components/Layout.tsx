@@ -16,7 +16,7 @@ export default function Layout({ children, user }: LayoutProps) {
         <div className="p-6 border-bottom border-[#E4E3E0] flex items-center gap-3">
           <div className="w-12 h-12 flex items-center justify-center rounded-full overflow-hidden border-2 border-brand-gold shadow-sm bg-brand-pink">
             <img 
-              src="/logo.svg" 
+              src="/logo.png" 
               alt="Tianne Logo" 
               className="w-full h-full object-cover" 
               referrerPolicy="no-referrer"
