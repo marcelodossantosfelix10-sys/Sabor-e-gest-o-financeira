@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, Receipt, TrendingUp, LogOut, Coffee, ShoppingCart } from 'lucide-react';
-import { logOut } from '../lib/firebase';
+import { LayoutDashboard, Package, Receipt, TrendingUp, LogOut, ShoppingCart } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,6 +9,8 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, user }: LayoutProps) {
+  const { logout } = useAuth();
+
   return (
     <div className="min-h-screen bg-[#F5F5F3] flex text-[#141414] font-sans">
       {/* Sidebar */}
@@ -52,7 +54,7 @@ export default function Layout({ children, user }: LayoutProps) {
             </div>
           </div>
           <button
-            onClick={() => logOut()}
+            onClick={() => logout()}
             className="flex items-center gap-2 w-full p-2 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >
             <LogOut size={18} />

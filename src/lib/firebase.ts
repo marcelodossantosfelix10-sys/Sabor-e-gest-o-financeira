@@ -8,17 +8,6 @@ export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 export const auth = getAuth();
 export const googleProvider = new GoogleAuthProvider();
 
-export const signIn = async () => {
-  try {
-    const result = await signInWithPopup(auth, googleProvider);
-    return result;
-  } catch (error) {
-    console.error("Login Error Details:", error);
-    throw error;
-  }
-};
-export const logOut = () => signOut(auth);
-
 // Connection test
 async function testConnection() {
   try {
