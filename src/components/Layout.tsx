@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, Receipt, TrendingUp, LogOut, ShoppingCart } from 'lucide-react';
+import { LayoutDashboard, Package, Receipt, TrendingUp, LogOut, ShoppingCart, Calendar } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface LayoutProps {
@@ -34,6 +34,7 @@ export default function Layout({ children, user }: LayoutProps) {
         <nav className="flex-1 px-4 py-6 space-y-1">
           <MenuLink to="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
           <MenuLink to="/products" icon={<Package size={20} />} label="Estoque" />
+          <MenuLink to="/orders" icon={<Calendar size={20} />} label="Encomendas" />
           <MenuLink to="/shopping" icon={<ShoppingCart size={20} />} label="Lista de Compras" />
           <MenuLink to="/finance" icon={<Receipt size={20} />} label="Financeiro" />
           <MenuLink to="/reports" icon={<TrendingUp size={20} />} label="Relatórios" />

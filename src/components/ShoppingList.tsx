@@ -8,7 +8,8 @@ import {
   CheckCircle2, 
   Circle,
   ShoppingCart,
-  Loader2
+  Loader2,
+  Share2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -29,6 +30,21 @@ export default function ShoppingList() {
 
     return unsubscribe;
   }, []);
+
+  const shareToWhatsApp = () => {
+    const pendingItems = items.filter(item => !item.isBought);
+    if (pendingItems.length === 0) {
+      alert("Não há itens pendentes para compartilhar.");
+      return;
+    }
+
+    const message = `*🛒 MINHA LISTA DE COMPRAS - TIANNE LANCHES*\n\n` + 
+      pendingItems.map(item => `• ${item.name} ${item.quantity ? `(${item.quantity}${item.unit})` : ''}`).join('\n') +
+      `\n\n_Gerado em: ${new Date().toLocaleDateString('pt-BR')}_`;
+    
+    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank');
+  };
 
   const addItem = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,9 +89,20 @@ export default function ShoppingList() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      <header>
-        <h2 className="text-3xl font-bold tracking-tight">Lista de Compras</h2>
-        <p className="text-gray-500 font-medium">Itens e insumos para reposição.</p>
+      <header className="flex justify-between items-center">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Lista de Compras</h2>
+          <p className="text-gray-500 font-medium">Itens e insumos para reposição.</p>
+        </div>
+        {items.some(item => !item.isBought) && (
+          <button 
+            onClick={shareToWhatsApp}
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-xl font-bold hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20 text-sm"
+          >
+            <Share2 size={18} />
+            Compartilhar WhatsApp
+          </button>
+        )}
       </header>
 
       {/* Quick Add Form */}

@@ -25,6 +25,7 @@ export default function Finance() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
+  const [dateFilter, setDateFilter] = useState<'all' | 'month'>('month');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -98,11 +99,14 @@ export default function Finance() {
     });
   };
 
+  const currentMonthStr = format(new Date(), 'yyyy-MM');
+
   const filteredTransactions = transactions.filter(t => {
     const matchesSearch = t.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          t.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === 'all' || t.type === typeFilter;
-    return matchesSearch && matchesType;
+    const matchesDate = dateFilter === 'all' || t.date.startsWith(currentMonthStr);
+    return matchesSearch && matchesType && matchesDate;
   });
 
   return (
@@ -142,6 +146,14 @@ export default function Finance() {
               className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all ${typeFilter === 'expense' ? 'bg-rose-600 text-white' : 'bg-white text-rose-600 border border-[#E4E3E0]'}`}
             >
               Saídas
+            </button>
+            <span className="w-px h-8 bg-gray-200 mx-2 self-center" />
+            <button
+              onClick={() => setDateFilter(dateFilter === 'all' ? 'month' : 'all')}
+              className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${dateFilter === 'month' ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 border border-[#E4E3E0]'}`}
+            >
+              <Calendar size={14} />
+              {dateFilter === 'month' ? 'Este Mês' : 'Tudo'}
             </button>
           </div>
 

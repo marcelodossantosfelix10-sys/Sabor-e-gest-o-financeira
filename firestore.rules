@@ -8,7 +8,7 @@ service cloud.firestore {
 
     // Phase 3: Primitive Definition
     function isSignedIn() { return request.auth != null; }
-    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function isValidId(id) { return id is string && id.size() > 0 && id.size() <= 128; }
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
 
@@ -43,7 +43,21 @@ service cloud.firestore {
       allow delete: if isSignedIn() && isValidId(itemId);
     }
 
+    match /orders/{orderId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(orderId) && isValidOrder(incoming());
+      allow update: if isSignedIn() && isValidId(orderId) && isValidOrder(incoming());
+      allow delete: if isSignedIn() && isValidId(orderId);
+    }
+
     // Validation Helpers
+    function isValidOrder(data) {
+      return data.keys().hasAll(['customerName', 'deliveryDate', 'status', 'totalAmount'])
+        && data.keys().size() >= 4 && data.keys().size() <= 10
+        && data.customerName is string && data.customerName.size() > 0
+        && data.status in ['pending', 'confirmed', 'production', 'ready', 'delivered', 'cancelled']
+        && data.totalAmount is number;
+    }
     function isValidShoppingItem(data) {
       return data.keys().hasAll(['name', 'isBought'])
         && data.keys().size() >= 2 && data.keys().size() <= 6

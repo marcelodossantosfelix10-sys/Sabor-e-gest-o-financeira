@@ -8,7 +8,8 @@ import {
   ArrowDownRight, 
   Box, 
   AlertCircle,
-  TrendingUp
+  TrendingUp,
+  Calendar
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -29,6 +30,7 @@ import { ptBR } from 'date-fns/locale';
 export default function Dashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,12 +42,18 @@ export default function Dashboard() {
     const qProducts = query(collection(db, 'products'));
     const unsubscribeP = onSnapshot(qProducts, (snapshot) => {
       setProducts(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
-      setLoading(false);
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'products'));
+
+    const qOrders = query(collection(db, 'orders'));
+    const unsubscribeO = onSnapshot(qOrders, (snapshot) => {
+      setOrders(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    });
 
     return () => {
       unsubscribeT();
       unsubscribeP();
+      unsubscribeO();
     };
   }, []);
 
@@ -60,6 +68,13 @@ export default function Dashboard() {
   const profit = totalIncome - totalExpense;
 
   const lowStockProducts = products.filter(p => p.stock < 10);
+  
+  const estimatedInventoryValue = products.reduce((sum, p) => sum + (p.stock * p.costPrice), 0);
+  const potentialProfitFromStock = products.reduce((sum, p) => sum + (p.stock * (p.sellingPrice - p.costPrice)), 0);
+
+  const pendingOrdersValue = orders
+    .filter(o => ['pending', 'confirmed', 'production', 'ready'].includes(o.status))
+    .reduce((sum, o) => sum + (o.totalAmount || 0), 0);
 
   // Chart data: Group by last 6 months
   const last6Months = Array.from({ length: 6 }).map((_, i) => {
@@ -98,12 +113,20 @@ export default function Dashboard() {
       </header>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-6 gap-6">
         <StatCard 
-          title="Receita Total" 
+          title="Receita Real" 
           value={totalIncome} 
           icon={<ArrowUpRight className="text-emerald-500" />} 
           type="currency"
+          subtitle="Total recebido"
+        />
+        <StatCard 
+          title="Encomendas Ativas" 
+          value={pendingOrdersValue} 
+          icon={<Calendar className="text-purple-500" />} 
+          type="currency"
+          subtitle="A receber/produzir"
         />
         <StatCard 
           title="Despesas" 
@@ -116,13 +139,21 @@ export default function Dashboard() {
           value={profit} 
           icon={<DollarSign className={profit >= 0 ? "text-emerald-500" : "text-rose-500"} />} 
           type="currency"
+          subtitle="Receita - Despesas"
         />
         <StatCard 
-          title="Produtos Baixos" 
-          value={lowStockProducts.length} 
-          icon={<AlertCircle className={lowStockProducts.length > 0 ? "text-amber-500" : "text-emerald-500"} />} 
-          type="number"
-          subtitle="Abaixo de 10 unidades"
+          title="Valor Estoque" 
+          value={estimatedInventoryValue} 
+          icon={<Box className="text-blue-500" />} 
+          type="currency"
+          subtitle="Preço custo x Qtd"
+        />
+        <StatCard 
+          title="Lucro Estoque" 
+          value={potentialProfitFromStock} 
+          icon={<TrendingUp className="text-brand-pink" />} 
+          type="currency"
+          subtitle="Margem do estoque"
         />
       </div>
 

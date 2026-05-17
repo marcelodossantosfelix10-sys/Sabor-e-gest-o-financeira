@@ -7,6 +7,7 @@ import Products from './components/Products';
 import Finance from './components/Finance';
 import Reports from './components/Reports';
 import ShoppingList from './components/ShoppingList';
+import Orders from './components/Orders';
 import { ArrowRight, LogIn, ExternalLink } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -133,6 +134,7 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/products" element={<Products />} />
+          <Route path="/orders" element={<Orders />} />
           <Route path="/shopping" element={<ShoppingList />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/reports" element={<Reports />} />
