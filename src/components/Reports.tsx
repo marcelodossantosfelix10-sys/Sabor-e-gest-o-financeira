@@ -1,5 +1,4 @@
-import React from 'react';
-import { TrendingUp, Download, Calendar } from 'lucide-react';
+import { Download, Calendar } from 'lucide-react';
 
 export default function Reports() {
   return (

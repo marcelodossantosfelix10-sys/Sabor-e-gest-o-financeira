@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { ShoppingItem } from '../types';
@@ -46,7 +46,7 @@ export default function ShoppingList() {
     window.open(url, '_blank');
   };
 
-  const addItem = async (e: React.FormEvent) => {
+  const addItem = async (e: FormEvent) => {
     e.preventDefault();
     if (!newItemName.trim()) return;
 

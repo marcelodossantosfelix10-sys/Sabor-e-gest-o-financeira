@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { collection, addDoc, onSnapshot, query, orderBy, limit, doc, runTransaction } from 'firebase/firestore';
+import { FormEvent, useState, useEffect } from 'react';
+import { collection, addDoc, deleteDoc, onSnapshot, query, orderBy, limit, doc, runTransaction } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Transaction, Product } from '../types';
 import { 
   Plus, 
   ArrowUpRight, 
   ArrowDownRight, 
-  Filter,
-  Search,
   Calendar,
+  Search,
   Tag,
   DollarSign,
-  Package,
   X
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -21,7 +19,6 @@ import { motion, AnimatePresence } from 'motion/react';
 export default function Finance() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<'all' | 'income' | 'expense'>('all');
@@ -42,7 +39,6 @@ export default function Finance() {
     const qT = query(collection(db, 'transactions'), orderBy('date', 'desc'), limit(100));
     const unsubscribeT = onSnapshot(qT, (snapshot) => {
       setTransactions(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction)));
-      setLoading(false);
     }, (err) => handleFirestoreError(err, OperationType.LIST, 'transactions'));
 
     const qP = query(collection(db, 'products'), orderBy('name', 'asc'));
@@ -56,7 +52,7 @@ export default function Finance() {
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
       // Use firestore transaction if it involves stock update
@@ -99,6 +95,35 @@ export default function Finance() {
     });
   };
 
+  const handleDeleteTransaction = async (transaction: Transaction) => {
+    const confirmed = window.confirm(`Excluir transação "${transaction.description}"?`);
+    if (!confirmed) return;
+
+    try {
+      if (transaction.type === 'income' && transaction.productId && transaction.quantity) {
+        const productId = transaction.productId;
+        const quantity = transaction.quantity;
+
+        await runTransaction(db, async (firestoreTransaction) => {
+          const transactionRef = doc(db, 'transactions', transaction.id);
+          const productRef = doc(db, 'products', productId);
+          const productDoc = await firestoreTransaction.get(productRef);
+
+          if (!productDoc.exists()) {
+            throw new Error('Produto associado à transação não encontrado');
+          }
+
+          const currentStock = productDoc.data().stock || 0;
+          firestoreTransaction.update(productRef, { stock: currentStock + quantity });
+          firestoreTransaction.delete(transactionRef);
+        });
+      } else {
+        await deleteDoc(doc(db, 'transactions', transaction.id));
+      }
+    } catch (err) {
+      handleFirestoreError(err, OperationType.DELETE, 'transactions');
+    }
+  };
   const currentMonthStr = format(new Date(), 'yyyy-MM');
 
   const filteredTransactions = transactions.filter(t => {
@@ -203,7 +228,7 @@ export default function Finance() {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-8 pl-16 md:pl-0">
+              <div className="flex items-center gap-4 pl-16 md:pl-0">
                 <div className="text-right">
                   <p className={`text-lg font-bold font-mono tracking-tight ${t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}`}>
                     {t.type === 'income' ? '+' : '-'} {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.amount)}
@@ -212,6 +237,14 @@ export default function Finance() {
                     <p className="text-[10px] font-bold text-gray-300 uppercase tracking-tighter">Qtd: {t.quantity}</p>
                   )}
                 </div>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteTransaction(t)}
+                  className="inline-flex items-center justify-center p-3 rounded-2xl text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                  aria-label={`Excluir transação ${t.description}`}
+                >
+                  <X size={18} />
+                </button>
               </div>
             </div>
           ))}

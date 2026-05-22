@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, onSnapshot, where } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
+import { collection, query, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { Transaction, Product } from '../types';
 import { 
@@ -7,7 +7,6 @@ import {
   ArrowUpRight, 
   ArrowDownRight, 
   Box, 
-  AlertCircle,
   TrendingUp,
   Calendar
 } from 'lucide-react';
@@ -21,10 +20,9 @@ import {
   ResponsiveContainer,
   Cell,
   PieChart,
-  Pie,
-  Legend
+  Pie
 } from 'recharts';
-import { format, startOfMonth, subMonths } from 'date-fns';
+import { format, subMonths } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 export default function Dashboard() {
@@ -216,7 +214,7 @@ export default function Dashboard() {
                     paddingAngle={5}
                     dataKey="value"
                   >
-                    {categoryData.map((entry, index) => (
+                    {categoryData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>

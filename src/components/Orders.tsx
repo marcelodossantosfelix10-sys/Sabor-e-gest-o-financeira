@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   collection, 
   addDoc, 
@@ -17,7 +17,7 @@ import {
   User, 
   Phone, 
   Plus, 
-  Search, 
+  Search,
   MoreVertical, 
   CheckCircle2, 
   Clock3, 
@@ -25,8 +25,7 @@ import {
   XCircle,
   Truck,
   MessageCircle,
-  Trash2,
-  ChevronRight
+  Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, parseISO } from 'date-fns';
@@ -63,7 +62,6 @@ const statusConfig = {
 export default function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
@@ -84,7 +82,6 @@ export default function Orders() {
         ...doc.data()
       })) as Order[];
       setOrders(ordersData);
-      setLoading(false);
     });
     return unsubscribe;
   }, []);

@@ -1,10 +1,10 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Package, Receipt, TrendingUp, LogOut, ShoppingCart, Calendar } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface LayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
   user: any;
 }
 
@@ -14,12 +14,12 @@ export default function Layout({ children, user }: LayoutProps) {
   return (
     <div className="min-h-screen bg-[#F5F5F3] flex text-[#141414] font-sans">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-[#E4E3E0] flex flex-col sticky top-0 h-screen">
+      <aside className="w-64 bg-white border-r border-[#E4E3E0] flex flex-col sticky top-0 h-screen" aria-label="Navegação principal">
         <div className="p-6 border-bottom border-[#E4E3E0] flex items-center gap-3">
           <div className="w-12 h-12 flex items-center justify-center rounded-full overflow-hidden border-2 border-brand-gold shadow-sm bg-brand-pink">
             <img 
-              src="/logo.png" 
-              alt="Tianne Logo" 
+              src="/logo.svg" 
+              alt="Logo da Tianne Lanches" 
               className="w-full h-full object-cover" 
               referrerPolicy="no-referrer"
               onError={(e) => (e.currentTarget.src = "https://ui-avatars.com/api/?name=Tianne&background=FF85A2&color=fff&bold=true")} 
@@ -31,8 +31,8 @@ export default function Layout({ children, user }: LayoutProps) {
           </div>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-1">
-          <MenuLink to="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
+        <nav className="flex-1 px-4 py-6 space-y-1" aria-label="Menu principal">
+          <MenuLink end to="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
           <MenuLink to="/products" icon={<Package size={20} />} label="Estoque" />
           <MenuLink to="/orders" icon={<Calendar size={20} />} label="Encomendas" />
           <MenuLink to="/shopping" icon={<ShoppingCart size={20} />} label="Lista de Compras" />
@@ -43,7 +43,7 @@ export default function Layout({ children, user }: LayoutProps) {
         <div className="p-4 border-t border-[#E4E3E0]">
           <div className="flex items-center gap-3 p-2 mb-4">
             {user.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 rounded-full" />
+              <img src={user.photoURL} alt={user.displayName ?? 'Foto do usuário'} className="w-8 h-8 rounded-full" />
             ) : (
               <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">
                 {user.displayName?.[0] || 'U'}
@@ -55,6 +55,7 @@ export default function Layout({ children, user }: LayoutProps) {
             </div>
           </div>
           <button
+            type="button"
             onClick={() => logout()}
             className="flex items-center gap-2 w-full p-2 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >
@@ -74,9 +75,10 @@ export default function Layout({ children, user }: LayoutProps) {
   );
 }
 
-function MenuLink({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+function MenuLink({ to, icon, label, end = false }: { to: string; icon: React.ReactNode; label: string; end?: boolean }) {
   return (
     <NavLink
+      end={end}
       to={to}
       className={({ isActive }) =>
         `flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
