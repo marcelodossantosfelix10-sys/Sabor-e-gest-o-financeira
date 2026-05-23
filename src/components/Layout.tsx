@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, Receipt, TrendingUp, LogOut, ShoppingCart, Calendar } from 'lucide-react';
+import { LayoutDashboard, Package, Receipt, TrendingUp, LogOut, ShoppingCart, Calendar, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface LayoutProps {
@@ -10,67 +11,131 @@ interface LayoutProps {
 
 export default function Layout({ children, user }: LayoutProps) {
   const { logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F5F5F3] flex text-[#141414] font-sans">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-[#E4E3E0] flex flex-col sticky top-0 h-screen" aria-label="Navegação principal">
-        <div className="p-6 border-bottom border-[#E4E3E0] flex items-center gap-3">
-          <div className="w-12 h-12 flex items-center justify-center rounded-full overflow-hidden border-2 border-brand-gold shadow-sm bg-brand-pink">
-            <img 
-              src="/logo.svg" 
-              alt="Logo da Tianne Lanches" 
-              className="w-full h-full object-cover" 
+    <div className="min-h-screen bg-[#F5F5F3] text-[#141414] font-sans">
+      <header className="flex items-center justify-between bg-white border-b border-[#E4E3E0] px-4 py-3 md:hidden sticky top-0 z-30">
+        <button
+          type="button"
+          onClick={() => setIsMobileMenuOpen(true)}
+          className="p-2 rounded-xl bg-[#141414] text-white shadow-sm"
+          aria-label="Abrir menu"
+        >
+          <Menu size={20} />
+        </button>
+
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl overflow-hidden border border-brand-gold bg-brand-pink flex items-center justify-center">
+            <img
+              src="/logo.svg"
+              alt="Logo da Tianne Lanches"
+              className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
-              onError={(e) => (e.currentTarget.src = "https://ui-avatars.com/api/?name=Tianne&background=FF85A2&color=fff&bold=true")} 
+              onError={(e) => (e.currentTarget.src = "https://ui-avatars.com/api/?name=Tianne&background=FF85A2&color=fff&bold=true")}
             />
           </div>
-          <div className="overflow-hidden">
-            <h1 className="font-bold text-sm tracking-tight truncate text-brand-dark">Tianne Lanches</h1>
+          <div>
+            <p className="text-sm font-semibold">Tianne Lanches</p>
             <p className="text-[10px] uppercase tracking-widest text-brand-pink font-black">Confeitaria</p>
           </div>
         </div>
 
-        <nav className="flex-1 px-4 py-6 space-y-1" aria-label="Menu principal">
-          <MenuLink end to="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
-          <MenuLink to="/products" icon={<Package size={20} />} label="Estoque" />
-          <MenuLink to="/orders" icon={<Calendar size={20} />} label="Encomendas" />
-          <MenuLink to="/shopping" icon={<ShoppingCart size={20} />} label="Lista de Compras" />
-          <MenuLink to="/finance" icon={<Receipt size={20} />} label="Financeiro" />
-          <MenuLink to="/reports" icon={<TrendingUp size={20} />} label="Relatórios" />
-        </nav>
+        <button
+          type="button"
+          onClick={() => logout()}
+          className="text-sm font-medium text-gray-600 hover:text-red-600"
+        >
+          Sair
+        </button>
+      </header>
 
-        <div className="p-4 border-t border-[#E4E3E0]">
-          <div className="flex items-center gap-3 p-2 mb-4">
-            {user.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName ?? 'Foto do usuário'} className="w-8 h-8 rounded-full" />
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">
-                {user.displayName?.[0] || 'U'}
+      <div className="flex min-h-[calc(100vh-56px)] md:min-h-screen">
+        <aside
+          className={`fixed inset-y-0 left-0 z-40 w-72 transform bg-white border-r border-[#E4E3E0] transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${
+            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+          aria-label="Navegação principal"
+        >
+          <div className="relative h-full flex flex-col">
+            <div className="p-6 border-b border-[#E4E3E0] flex items-center gap-3">
+              <div className="w-12 h-12 flex items-center justify-center rounded-full overflow-hidden border-2 border-brand-gold shadow-sm bg-brand-pink">
+                <img
+                  src="/logo.svg"
+                  alt="Logo da Tianne Lanches"
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => (e.currentTarget.src = "https://ui-avatars.com/api/?name=Tianne&background=FF85A2&color=fff&bold=true")}
+                />
               </div>
-            )}
-            <div className="overflow-hidden">
-              <p className="text-sm font-medium truncate">{user.displayName || 'Usuário'}</p>
-              <p className="text-[10px] text-gray-500 truncate">{user.email}</p>
+              <div className="overflow-hidden">
+                <h1 className="font-bold text-sm tracking-tight truncate text-brand-dark">Tianne Lanches</h1>
+                <p className="text-[10px] uppercase tracking-widest text-brand-pink font-black">Confeitaria</p>
+              </div>
             </div>
+
+            <nav className="flex-1 px-4 py-6 space-y-1" aria-label="Menu principal">
+              <MenuLink end to="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
+              <MenuLink to="/products" icon={<Package size={20} />} label="Estoque" />
+              <MenuLink to="/orders" icon={<Calendar size={20} />} label="Encomendas" />
+              <MenuLink to="/shopping" icon={<ShoppingCart size={20} />} label="Lista de Compras" />
+              <MenuLink to="/finance" icon={<Receipt size={20} />} label="Financeiro" />
+              <MenuLink to="/reports" icon={<TrendingUp size={20} />} label="Relatórios" />
+            </nav>
+
+            <div className="p-4 border-t border-[#E4E3E0]">
+              <div className="flex items-center gap-3 p-2 mb-4">
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt={user.displayName ?? 'Foto do usuário'} className="w-8 h-8 rounded-full" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">
+                    {user.displayName?.[0] || 'U'}
+                  </div>
+                )}
+                <div className="overflow-hidden">
+                  <p className="text-sm font-medium truncate">{user.displayName || 'Usuário'}</p>
+                  <p className="text-[10px] text-gray-500 truncate">{user.email}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  logout();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-2 w-full p-2 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              >
+                <LogOut size={18} />
+                Sair
+              </button>
+            </div>
+
+            <button
+              type="button"
+              className="absolute top-4 right-4 md:hidden p-2 rounded-lg bg-[#141414] text-white"
+              onClick={() => setIsMobileMenuOpen(false)}
+              aria-label="Fechar menu"
+            >
+              <X size={18} />
+            </button>
           </div>
+        </aside>
+
+        {isMobileMenuOpen && (
           <button
             type="button"
-            onClick={() => logout()}
-            className="flex items-center gap-2 w-full p-2 text-sm font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-          >
-            <LogOut size={18} />
-            Sair
-          </button>
-        </div>
-      </aside>
+            className="fixed inset-0 z-30 bg-black/30 md:hidden"
+            aria-hidden="true"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        <div className="max-w-6xl mx-auto p-8">
-          {children}
-        </div>
-      </main>
+        <main className="flex-1 overflow-auto">
+          <div className="max-w-full mx-auto px-4 py-6 md:px-8 md:py-8">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

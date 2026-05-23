@@ -18,7 +18,6 @@ import {
   Phone, 
   Plus, 
   Search,
-  MoreVertical, 
   CheckCircle2, 
   Clock3, 
   AlertCircle, 
@@ -276,52 +275,44 @@ export default function Orders() {
                   )}
                 </div>
 
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col gap-4">
                   <div>
                     <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Total Geral</p>
                     <p className="text-xl font-black text-brand-pink">R$ {order.totalAmount.toFixed(2)}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-[auto_auto_auto]">
                     <button 
                       onClick={() => sendWhatsApp(order)}
-                      className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
+                      className="flex items-center justify-center gap-2 p-3 bg-emerald-50 text-emerald-600 rounded-2xl hover:bg-emerald-500 hover:text-white transition-all shadow-sm"
                       title="Enviar WhatsApp"
                     >
-                      <MessageCircle size={20} />
+                      <MessageCircle size={18} />
+                      WhatsApp
                     </button>
-                    <div className="relative group/menu">
-                      <button className="p-3 bg-gray-50 text-gray-400 rounded-2xl hover:bg-gray-100 transition-all">
-                        <MoreVertical size={20} />
-                      </button>
-                      <div className="absolute right-0 bottom-full mb-2 w-48 bg-white rounded-2xl shadow-2xl border border-gray-100 p-2 hidden group-hover/menu:block z-20">
-                        {Object.keys(statusConfig).map((s) => (
-                          <button
-                            key={s}
-                            onClick={() => updateStatus(order.id, s as Order['status'])}
-                            className="w-full text-left px-4 py-2 text-xs font-bold hover:bg-gray-50 rounded-xl flex items-center gap-2"
-                          >
-                            <span className={`w-2 h-2 rounded-full ${statusConfig[s as Order['status']].color.split(' ')[0]}`} />
-                            {statusConfig[s as Order['status']].label}
-                          </button>
-                        ))}
-                        <div className="h-px bg-gray-100 my-1" />
-                        <button
-                          disabled={deletingId === order.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteOrder(order.id);
-                          }}
-                          className={`w-full text-left px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50 rounded-xl flex items-center gap-2 ${deletingId === order.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                          {deletingId === order.id ? (
-                            <Clock size={14} className="animate-spin" />
-                          ) : (
-                            <Trash2 size={14} />
-                          )}
-                          {deletingId === order.id ? 'Excluindo...' : 'Excluir'}
-                        </button>
-                      </div>
-                    </div>
+                    <select
+                      value={order.status}
+                      onChange={(e) => updateStatus(order.id, e.target.value as Order['status'])}
+                      className="w-full min-w-[140px] p-3 rounded-2xl border border-gray-200 bg-white text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-pink/20"
+                    >
+                      {Object.entries(statusConfig).map(([key, config]) => (
+                        <option key={key} value={key}>{config.label}</option>
+                      ))}
+                    </select>
+                    <button
+                      disabled={deletingId === order.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteOrder(order.id);
+                      }}
+                      className={`flex items-center justify-center gap-2 p-3 rounded-2xl border border-red-100 text-red-500 bg-red-50 hover:bg-red-100 transition-all font-bold ${deletingId === order.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {deletingId === order.id ? (
+                        <Clock size={18} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={18} />
+                      )}
+                      {deletingId === order.id ? 'Excluindo' : 'Excluir'}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -415,8 +406,8 @@ export default function Orders() {
                 </div>
                 
                 {formData.items.map((item, index) => (
-                  <div key={index} className="flex gap-4 items-end bg-gray-50 p-4 rounded-2xl animate-in slide-in-from-right-4 duration-300">
-                    <div className="flex-2 space-y-1">
+                  <div key={index} className="flex flex-col gap-4 md:flex-row md:items-end bg-gray-50 p-4 rounded-2xl animate-in slide-in-from-right-4 duration-300">
+                    <div className="flex-1 space-y-1">
                       <label className="text-[10px] font-black uppercase text-gray-300">Item</label>
                       <input
                         required
@@ -427,7 +418,7 @@ export default function Orders() {
                         className="w-full bg-transparent border-none p-0 focus:ring-0 font-bold"
                       />
                     </div>
-                    <div className="w-20 space-y-1">
+                    <div className="w-full md:w-24 space-y-1">
                       <label className="text-[10px] font-black uppercase text-gray-300">Qtd</label>
                       <input
                         required
@@ -437,7 +428,7 @@ export default function Orders() {
                         className="w-full bg-transparent border-none p-0 focus:ring-0 font-bold"
                       />
                     </div>
-                    <div className="w-24 space-y-1">
+                    <div className="w-full md:w-28 space-y-1">
                       <label className="text-[10px] font-black uppercase text-gray-300">Preço Un.</label>
                       <input
                         required
@@ -451,7 +442,7 @@ export default function Orders() {
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(index)}
-                      className="p-2 text-gray-300 hover:text-red-500 transition-all"
+                      className="self-start md:self-auto p-2 text-gray-300 hover:text-red-500 transition-all"
                     >
                       <Trash2 size={18} />
                     </button>
